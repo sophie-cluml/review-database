@@ -5,6 +5,13 @@ file is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and
 this project adheres to [Semantic
 Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Modified `node_map` to IndexedMultimap in place of IndexedMap, enabling the
+  storage of multiple items under the same key, in client's perspective.
+
 ## [0.23.0] - 2024-01-18
 
 ### Added
@@ -87,7 +94,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Removed `batch_info` and `scores` arguments from `Model::from_storage` function.
   These arguments were previously used for custom initialization of the
   `batch_info` and `scores` fields within the model. This change means that when
-  you create a model using `Model::from_storage`, the  `batch_info` and `scores`
+  you create a model using `Model::from_storage`, the `batch_info` and `scores`
   fields will now be initialized with their default values. If you previously
   relied on custom values for these fields, you will need to update your code accordingly.
 
@@ -175,6 +182,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   Please note that if you are currently using a version of the application
   earlier than 0.12.0, database migration support has been deprecated and will
   no longer be available.
+
   - Users on versions prior to 0.12.0 will need to manually manage their database
     schema updates if they choose to continue using these older versions.
   - We highly recommend upgrading to the latest version (0.12.0 or later) to
@@ -212,6 +220,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   code if you have been using the old naming convention. We apologise for any
   inconvenience this may cause, but we believe this change will bring greater
   consistency and readability to the codebase.
+
 - Removed `src_port` field from `FtpBruteForce` and `LdapBruteForce` events.
   to align with the event fields provided by hog.
 - Modified `LdapPlainText` fields to appropriate LDAP event fields from wrong
@@ -257,6 +266,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 - Added a new flag, `flush`, to the backup functionality, allowing users to
   control whether the database should be flushed before initiating the backup
   process.
+
   - When the flush flag is set to true, the database will be flushed before
     initiating the backup. This ensures that all pending data is written to
     disk, minimizing the risk of data loss during the backup process.
@@ -270,6 +280,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   Exclusive access to the database directory and backup directory is necessary
   for consistency and integrity. This prevents potential conflicts or data
   corruption during these critical processes.
+
   - It is recommended to schedule these operations during maintenance windows
     or low-activity periods to minimize disruption to users and services.
   - Ensure that appropriate permissions are granted to the executing user or
@@ -281,6 +292,7 @@ Versioning](https://semver.org/spec/v2.0.0.html).
   thread safety and data consistency during these operations.
 
 - Modified the `restore` function argument `backup_id` from `u32` to `Option<u32>`.
+
   - When `backup_id` is set to `Some(id)`, the function restores from the backup
     with the provided `id`.
   - When `backup_id` is set to `None`, the function restores from the latest
@@ -336,23 +348,23 @@ Versioning](https://semver.org/spec/v2.0.0.html).
 ### Changed
 
 - Altered the model file naming convention: Files are now required to use the
-.tmm extension. The format has changed from `{model_name}-{timestamp}` to
-`{model_name}-{timestamp}.tmm`. This adjustment ensures consistency in model
-file formats and enhances our file identification and management system.
+  .tmm extension. The format has changed from `{model_name}-{timestamp}` to
+  `{model_name}-{timestamp}.tmm`. This adjustment ensures consistency in model
+  file formats and enhances our file identification and management system.
 - Updated the logging mechanism to include a message `Migrating database to
 {version}` when a database migration starts. This change enhances the
-visibility and traceability of our database migrations, aiding in system
-maintenance and debugging efforts.
+  visibility and traceability of our database migrations, aiding in system
+  maintenance and debugging efforts.
 
 ### Removed
 
 - Removed `Database::update_agent_status` from the review-database. In prior
-versions, this function was used when REview allowed agents to forward messages
-from another agent not directly connected to REview. However, in the recent
-architectural changes, all agents now directly connect to REview, rendering
-this function obsolete. The removal of `Database::update_agent_status`
-simplifies the overall architecture and eliminates unnecessary function calls,
-leading to a more streamlined system.
+  versions, this function was used when REview allowed agents to forward messages
+  from another agent not directly connected to REview. However, in the recent
+  architectural changes, all agents now directly connect to REview, rendering
+  this function obsolete. The removal of `Database::update_agent_status`
+  simplifies the overall architecture and eliminates unnecessary function calls,
+  leading to a more streamlined system.
 
 ## [0.13.2] - 2023-05-31
 
@@ -369,12 +381,12 @@ leading to a more streamlined system.
 
 - New functions in `backup`:
   - `list`: This function retrieves the details of backups stored on the file
-  system and returns a vector of `BackupInfo` instances. Each `BackupInfo`
-  instance contains details such as the backup's ID, creation timestamp, and
-  size.
+    system and returns a vector of `BackupInfo` instances. Each `BackupInfo`
+    instance contains details such as the backup's ID, creation timestamp, and
+    size.
   - `restore`: This function enables the restoration of backups using their ID.
-  Users can restore their data from a specific backup by providing the `Store`
-  instance and the backup ID.
+    Users can restore their data from a specific backup by providing the `Store`
+    instance and the backup ID.
 
 ### Fixed
 
