@@ -1016,7 +1016,6 @@ fn migrate_0_29_account(store: &super::Store) -> Result<()> {
     use chrono::{DateTime, Utc};
 
     use crate::account::{PasswordHashAlgorithm, Role, SaltedPassword};
-    use crate::types::Account;
 
     #[derive(Deserialize, Serialize)]
     pub struct OldAccount {
@@ -1032,7 +1031,23 @@ fn migrate_0_29_account(store: &super::Store) -> Result<()> {
         password_hash_algorithm: PasswordHashAlgorithm,
     }
 
-    impl From<OldAccount> for Account {
+    #[derive(Deserialize, Serialize)]
+    pub struct NewAccount {
+        pub username: String,
+        pub(crate) password: SaltedPassword,
+        pub role: Role,
+        pub name: String,
+        pub department: String,
+        pub language: Option<String>,
+        pub(crate) creation_time: DateTime<Utc>,
+        pub(crate) last_signin_time: Option<DateTime<Utc>>,
+        pub allow_access_from: Option<Vec<IpAddr>>,
+        pub max_parallel_sessions: Option<u32>,
+        pub(crate) password_hash_algorithm: PasswordHashAlgorithm,
+        pub(crate) password_last_modified_at: DateTime<Utc>,
+    }
+
+    impl From<OldAccount> for NewAccount {
         fn from(input: OldAccount) -> Self {
             Self {
                 username: input.username,
@@ -1053,15 +1068,13 @@ fn migrate_0_29_account(store: &super::Store) -> Result<()> {
 
     let map = store.account_map();
     let raw = map.raw();
-    let mut accounts = vec![];
     for (key, old_value) in raw.iter_forward()? {
         let old = bincode::DefaultOptions::new().deserialize::<OldAccount>(&old_value)?;
-        raw.delete(&key)?;
-        accounts.push(old.into());
+        let new: NewAccount = old.into();
+        let new_value = bincode::DefaultOptions::new().serialize::<NewAccount>(&new)?;
+        raw.update((&key, &old_value), (&key, &new_value))?;
     }
-    for account in accounts {
-        map.insert(&account)?;
-    }
+
     Ok(())
 }
 
